@@ -6,7 +6,7 @@ __lua__
 function cmp_init()
  local c = {
   anim   = {},
-  name  = {},
+  name   = {},
   health = {},
   hud    = {},
   hitbox = {},
@@ -30,8 +30,7 @@ function cmp_add_health(id, val)
 end
 
 function cmp_add_hitbox(id, x, y, w, h)
- add(cmp.hitbox, {id = id, x = x, y = y, w = w, h = h})
-end
+ add(cmp.hitbox, {id = id, x = x, y = y, w = w, h = h}) end
 
 function cmp_add_hud(id, sx, sy)
  add(cmp.hud, {id = id, sx = sx, sy = sy})
@@ -172,6 +171,9 @@ function ent_delete(id)
  i = cmp_hitbox_get_index(id)
  if i != 0 then deli(cmp.hitbox, i) end
 
+ i = cmp_hud_get_index(id)
+ if i != 0 then deli(cmp.hud, i) end
+
  i = cmp_pos_get_index(id)
  if i != 0 then deli(cmp.pos, i) end
 
@@ -185,6 +187,27 @@ end
 
 -->8
 --systems
+
+function sys_animate()
+ local i, j, k
+ for i = 1, #cmp.anim do
+  if(#cmp.anim[i].frames > 1) then
+   if(cmp.anim[i].time > 0) then
+    cmp.anim[i].time -= 1
+   elseif(cmp.anim[i].time == 0) then
+    if(cmp.anim[i].frame_current_index < #cmp.anim[i].frames) then
+     cmp.anim[i].frame_current_index += 1
+    else
+     cmp.anim[i].frame_current_index = 1
+    end 
+    j = cmp_sprite_get_index(cmp.anim[i].id)
+    k = cmp.anim[i].frame_current_index
+    cmp.sprite[j].num = cmp.anim[i].frames[k] 
+    cmp.anim[i].time = cmp.anim[i].frame_duration
+   end
+  end
+ end
+end
 
 function sys_draw_hud()
  local hx1 = 0 
@@ -341,28 +364,6 @@ function sys_intern_y_sort()
  end
 end
 
-function sys_animate()
- --id, frame_duration = frame_duration, time = 0, frame_current_index = 1, frames = frames
- local i, j, k
-
- for i = 1, #cmp.anim do
-  if(#cmp.anim[i].frames > 1) then
-   if(cmp.anim[i].time > 0) then
-    cmp.anim[i].time -= 1
-   elseif(cmp.anim[i].time == 0) then
-    if(cmp.anim[i].frame_current_index < #cmp.anim[i].frames) then
-     cmp.anim[i].frame_current_index += 1
-    else
-     cmp.anim[i].frame_current_index = 1
-    end 
-    j = cmp_sprite_get_index(cmp.anim[i].id)
-    k = cmp.anim[i].frame_current_index
-    cmp.sprite[j].num = cmp.anim[i].frames[k] 
-    cmp.anim[i].time = cmp.anim[i].frame_duration
-   end
-  end
- end
-end
 
 function sys_update_selected()
  local max_selectable = 15
