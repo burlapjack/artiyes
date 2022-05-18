@@ -6,6 +6,7 @@ __lua__
 function cmp_init()
  local c = {
   anim   = {},
+  dest   = {},
   name   = {},
   health = {},
   hud    = {},
@@ -19,6 +20,10 @@ end
 
 function cmp_add_animation(id, frame_duration, frames)
  add(cmp.anim, {id = id, frame_duration = frame_duration, time = 0, frame_current_index = 1, frames = frames})
+end
+
+function cmp_add_destination(id, x, y)
+ add(cmp.dest, {id = id, x = x, y = y})
 end
 
 function cmp_add_name(id, value)
@@ -40,8 +45,8 @@ function cmp_add_position(id, x, y)
  add(cmp.pos, {id = id, x = x, y = y})  
 end
 
-function cmp_add_selected(id)
- add(cmp.sel, {id = id, value = 0})
+function cmp_add_select(id, groupable)
+ add(cmp.sel, {id = id, groupable = groupable, value = 0})
 end
 
 function cmp_add_sprite(id, spr_num, w, h)
@@ -57,6 +62,18 @@ function cmp_anim_get_index(id)
   end
  end
  printh("ERROR in cmp_anim_get_index(id): id not found")
+ return 0
+end
+
+function cmp_dest_get_index(id)
+ local i
+ local dest = cmp.dest
+ for i = 1, #dest do
+  if dest[i].id == id then
+   return i
+  end
+ end
+ printh("ERROR in cmp_dest_get_index(id): id not found")
  return 0
 end
 
@@ -148,12 +165,25 @@ end
 --entities
 function ent_add_grunt(id, x, y)
  cmp_add_animation(id, 10, {1, 2})
+ cmp_add_destination(id, x, y)
  cmp_add_name(id, "grunt")
  cmp_add_health(id, 10)
  cmp_add_hitbox(id, x, y, 8, 8)
  cmp_add_hud(id, 8, 0) 
  cmp_add_position(id, x, y)
- cmp_add_selected(id)
+ cmp_add_select(id, 1)
+ cmp_add_sprite(id, 1, 1, 1)
+end
+
+function ent_add_house(id, x, y)
+ cmp_add_animation(id, 10, {1, 2})
+ cmp_add_destination(id, x, y)
+ cmp_add_name(id, "house")
+ cmp_add_health(id, 10)
+ cmp_add_hitbox(id, x, y, 8, 8)
+ cmp_add_hud(id, 8, 0) 
+ cmp_add_position(id, x, y)
+ cmp_add_select(id, 1)
  cmp_add_sprite(id, 1, 1, 1)
 end
 
@@ -161,6 +191,9 @@ function ent_delete(id)
  local i = 0
  i = cmp_anim_get_index(id)
  if i != 0 then deli(cmp.anim, i) end
+
+ i = cmp_dest_get_index(id)
+ if i != 0 then deli(cmp.dest, i) end
 
  i = cmp_name_get_index(id)
  if i != 0 then deli(cmp.name, i) end
@@ -364,6 +397,17 @@ function sys_intern_y_sort()
  end
 end
 
+function sys_update_destination(x, y)
+ local i, j
+ local sel = cmp.sel
+ for i = 1, #sel do
+  if(sel[i].value == 1)then
+   j = cmp_dest_get_index(id)
+   cmp.dest[j].x = x
+   cmp.dest[j].y = y
+  end
+ end
+end
 
 function sys_update_selected()
  local max_selectable = 15
@@ -377,7 +421,7 @@ function sys_update_selected()
  local pos = cmp.pos
  local sprite = cmp.sprite
  local hitbox = cmp.hitbox
-
+ 
  --if the selection box is less
  --than 5 pixels wide *AND* less
  --than 5 pixels tall then
@@ -397,11 +441,13 @@ function sys_update_selected()
   center_y = pos[j].y + flr(hitbox[l].h/2)
   --mouse selection box
   if(box_is_too_small == 0) then
-   if( min(x1, x2) < center_x
+   if( 
+   cmp.sel[k].groupable == 1
+   and n_selected < max_selectable
+   and min(x1, x2) < center_x
    and max(x1, x2) > center_x
    and min(y1, y2) < center_y
-   and max(y1, y2) > center_y) 
-   and n_selected < max_selectable then
+   and max(y1, y2) > center_y) then
     cmp.sel[k].value = 1
     n_selected += 1
    else
@@ -419,7 +465,6 @@ function sys_update_selected()
    end
   end   
  end
-
 end
 
 -->8
@@ -433,7 +478,7 @@ end
  }
 
 function mouse_update()
- if(stat(34) == 1) then
+ if(stat(34) == 1) then --left click
   if(mouse.pressed != 1) then
    mouse.pressed = 1
    mouse.box_x1 = stat(32)
@@ -450,7 +495,11 @@ function mouse_update()
   mouse.box_y2 = nil
   mouse.pressed = 0
  end
- mouse.pressed = stat(34)
+ 
+ if(stat(34) == 2) then --right click
+  mouse.pressed = 2 
+  sys_update_destination(stat(32), stat(33))
+ end
 end
 
 function mouse_draw_selection_box()
@@ -464,7 +513,7 @@ function _init()
  screen = 1
  next_id = 1
  cls()
- poke(0x5f2d, 1)
+ poke(0x5f2d, 1) --enable mouse
  cmp = cmp_init()
 
   ent_add_grunt(next_id, 13, 39)
