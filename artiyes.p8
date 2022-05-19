@@ -61,7 +61,6 @@ function cmp_anim_get_index(id)
    return i
   end
  end
- printh("ERROR in cmp_anim_get_index(id): id not found")
  return 0
 end
 
@@ -73,7 +72,6 @@ function cmp_dest_get_index(id)
    return i
   end
  end
- printh("ERROR in cmp_dest_get_index(id): id not found")
  return 0
 end
 
@@ -85,7 +83,6 @@ function cmp_name_get_index(id)
    return i
   end
  end
- printh("ERROR in cmp_name_get_index(id): id not found")
  return 0
 end
 
@@ -97,7 +94,6 @@ function cmp_health_get_index(id)
    return i
   end
  end
- printh("ERROR in cmp_health_get_index(id): id not found")
  return 0
 end
 
@@ -109,7 +105,6 @@ function cmp_hitbox_get_index(id)
    return i
   end
  end
- printh("ERROR in cmp_hitbox_get_index(id): id not found")
  return 0
 end
 
@@ -121,7 +116,6 @@ function cmp_hud_get_index(id)
    return i
   end
  end
- printh("ERROR in cmp_hud_get_index(id): id not found")
  return 0
 end
 
@@ -133,7 +127,6 @@ function cmp_pos_get_index(id)
    return i
   end
  end
- printh("ERROR in cmp_pos_get_index(id): id not found")
  return 0
 end
 
@@ -145,7 +138,6 @@ function cmp_sel_get_index(id)
    return i
   end
  end
- printh("ERROR in cmp_sel_get_index(id): id not found")
  return 0
 end
 
@@ -157,7 +149,6 @@ function cmp_sprite_get_index(id)
    return i
   end
  end
- printh("ERROR in cmp_sprite_get_index(id): id not found")
  return 0
 end
 
@@ -397,12 +388,30 @@ function sys_intern_y_sort()
  end
 end
 
+function sys_move()
+ local i, j
+ local px, py
+ local dx, dy
+ local dest = cmp.dest
+ local pos = cmp.pos
+ for i = 1, #dest do
+  dx = dest[i].x
+  dy = dest[i].y
+  j = cmp_pos_get_index(dest[i].id)
+  px = pos[j].x
+  py = pos[j].y
+  if(px != dx or py != dy) then
+   --ent moves to destination
+  end
+ end
+end
+
 function sys_update_destination(x, y)
  local i, j
  local sel = cmp.sel
  for i = 1, #sel do
   if(sel[i].value == 1)then
-   j = cmp_dest_get_index(id)
+   j = cmp_dest_get_index(sel[i].id)
    cmp.dest[j].x = x
    cmp.dest[j].y = y
   end
