@@ -389,7 +389,7 @@ end
 
 function sys_move()
  local i, j
- local graph = []
+ local graph = {}
  local px, py
  local dx, dy, ds
  local dest = cmp.dest
