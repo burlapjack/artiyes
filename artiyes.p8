@@ -22,8 +22,8 @@ function cmp_add_animation(id, frame_duration, frames)
  add(cmp.anim, {id = id, frame_duration = frame_duration, time = 0, frame_current_index = 1, frames = frames})
 end
 
-function cmp_add_destination(id, x, y)
- add(cmp.dest, {id = id, x = x, y = y})
+function cmp_add_destination(id, x, y, speed)
+ add(cmp.dest, {id = id, x = x, y = y, speed = speed})
 end
 
 function cmp_add_name(id, value)
@@ -42,7 +42,7 @@ function cmp_add_hud(id, sx, sy)
 end
 
 function cmp_add_position(id, x, y)
- add(cmp.pos, {id = id, x = x, y = y})  
+ add(cmp.pos, {id = id, x = x, y = y})
 end
 
 function cmp_add_select(id, groupable)
@@ -156,11 +156,11 @@ end
 --entities
 function ent_add_grunt(id, x, y)
  cmp_add_animation(id, 10, {1, 2})
- cmp_add_destination(id, x, y)
+ cmp_add_destination(id, x, y, 1)
  cmp_add_name(id, "grunt")
  cmp_add_health(id, 10)
  cmp_add_hitbox(id, x, y, 8, 8)
- cmp_add_hud(id, 8, 0) 
+ cmp_add_hud(id, 8, 0)
  cmp_add_position(id, x, y)
  cmp_add_select(id, 1)
  cmp_add_sprite(id, 1, 1, 1)
@@ -168,11 +168,10 @@ end
 
 function ent_add_house(id, x, y)
  cmp_add_animation(id, 10, {1, 2})
- cmp_add_destination(id, x, y)
  cmp_add_name(id, "house")
  cmp_add_health(id, 10)
  cmp_add_hitbox(id, x, y, 8, 8)
- cmp_add_hud(id, 8, 0) 
+ cmp_add_hud(id, 8, 0)
  cmp_add_position(id, x, y)
  cmp_add_select(id, 1)
  cmp_add_sprite(id, 1, 1, 1)
@@ -223,10 +222,10 @@ function sys_animate()
      cmp.anim[i].frame_current_index += 1
     else
      cmp.anim[i].frame_current_index = 1
-    end 
+    end
     j = cmp_sprite_get_index(cmp.anim[i].id)
     k = cmp.anim[i].frame_current_index
-    cmp.sprite[j].num = cmp.anim[i].frames[k] 
+    cmp.sprite[j].num = cmp.anim[i].frames[k]
     cmp.anim[i].time = cmp.anim[i].frame_duration
    end
   end
@@ -234,7 +233,7 @@ function sys_animate()
 end
 
 function sys_draw_hud()
- local hx1 = 0 
+ local hx1 = 0
  local hy1 = 94
  local hx2 = 127
  local hy2 = 127
@@ -266,7 +265,7 @@ function sys_draw_hud()
   if (sel[i].value == 1) then
    add(ents_selected, sel[i].id)
   end
- end 
+ end
  if (#ents_selected == 1) then                --one unit is selected.
   h = cmp_hud_get_index(ents_selected[1])
   hp = cmp_health_get_index(ents_selected[1])
@@ -284,13 +283,13 @@ function sys_draw_hud()
   false, false)      --flip_x/flip_y
   print(name[c].value, sepx1 + 2 + big_spr_w, 97, fnt)          --selected unit name
   print(health[hp].value, sepx1 + 2 + big_spr_w, 103, fnt)      --selected unit health
-  if(health[hp].value < 10) then 
+  if(health[hp].value < 10) then
    pad = 4
   elseif(health[hp].value < 100) then
    pad = 8
   else
    pad = 12
-  end 
+  end
 
   print("/", sepx1 + 2 + pad + big_spr_w, 103, fnt)       --selected unit health
   print("10", sepx1 + 2 + pad + 4 + big_spr_w, 103, fnt)  --selected unit health
@@ -307,7 +306,7 @@ function sys_draw_hud()
   for i = 1, #ents_selected do
    h = cmp_hud_get_index(ents_selected[i])
    hp = cmp_health_get_index(ents_selected[i])
-   s = cmp_sprite_get_index(ents_selected[i]) 
+   s = cmp_sprite_get_index(ents_selected[i])
    if (i == n_cols + 1) then
     row = 1
     col = 0
@@ -366,10 +365,10 @@ function sys_draw_healthbars()
    --taking into account the
    --amount of hitpoints which
    --will make the bar longer.
-   x_offset = cmp.pos[j].x + flr((cmp.hitbox[k].w) / 2) - flr(cmp.health[h].maximum / 2) 
+   x_offset = cmp.pos[j].x + flr((cmp.hitbox[k].w) / 2) - flr(cmp.health[h].maximum / 2)
    y_offset = cmp.pos[j].y - 2
-   rectfill(x_offset, y_offset, x_offset + cmp.health[h].maximum, y_offset - 1, 8) 
-   rectfill(x_offset, y_offset, x_offset + cmp.health[h].value, y_offset - 1, 11) 
+   rectfill(x_offset, y_offset, x_offset + cmp.health[h].maximum, y_offset - 1, 8)
+   rectfill(x_offset, y_offset, x_offset + cmp.health[h].value, y_offset - 1, 11)
   end
  end
 end
@@ -378,7 +377,7 @@ function sys_intern_y_sort()
  local i, j, temp
  --sort pos table by y.
  for i = 1, #cmp.pos - 1 do
-  for j = 1, #cmp.pos - i do 
+  for j = 1, #cmp.pos - i do
    if cmp.pos[j].y > cmp.pos[j + 1].y then
     temp = cmp.pos[j + 1]
     cmp.pos[j + 1] = cmp.pos[j]
@@ -390,19 +389,31 @@ end
 
 function sys_move()
  local i, j
+ local graph = []
  local px, py
- local dx, dy
+ local dx, dy, ds
  local dest = cmp.dest
  local pos = cmp.pos
  for i = 1, #dest do
   dx = dest[i].x
   dy = dest[i].y
+  ds = dest[i].speed
   j = cmp_pos_get_index(dest[i].id)
   px = pos[j].x
   py = pos[j].y
-  if(px != dx or py != dy) then
+   if(px < dx) then
+    cmp.pos[j].x += min(ds, dx - px)
+   elseif(px > dx) then
+    cmp.pos[j].x -= min(ds, px - dx)
+   end
+   if(py < dy) then
+    cmp.pos[j].y += min(ds, dy - py)
+   elseif(py > dy) then
+    cmp.pos[j].y -= min(ds, py - dy)
+   end
    --ent moves to destination
-  end
+   --pathfinding code will be
+   --called here.
  end
 end
 
@@ -420,8 +431,8 @@ end
 
 function sys_update_selected()
  local max_selectable = 15
- local j, k, l, p, s 
- local center_x, center_y 
+ local j, k, l, p, s
+ local center_x, center_y
  local box_is_too_small = 0
  local x1 = mouse.box_x1
  local y1 = mouse.box_y1
@@ -430,7 +441,7 @@ function sys_update_selected()
  local pos = cmp.pos
  local sprite = cmp.sprite
  local hitbox = cmp.hitbox
- 
+
  --if the selection box is less
  --than 5 pixels wide *AND* less
  --than 5 pixels tall then
@@ -450,7 +461,7 @@ function sys_update_selected()
   center_y = pos[j].y + flr(hitbox[l].h/2)
   --mouse selection box
   if(box_is_too_small == 0) then
-   if( 
+   if(
    cmp.sel[k].groupable == 1
    and n_selected < max_selectable
    and min(x1, x2) < center_x
@@ -465,14 +476,14 @@ function sys_update_selected()
   elseif(box_is_too_small == 1) then
    --quick mouse click
    if abs(center_x - x1) < flr(hitbox[l].w/2)
-   and abs(center_y - y1) < flr(hitbox[l].w/2) 
+   and abs(center_y - y1) < flr(hitbox[l].w/2)
    and n_selected < max_selectable then
     cmp.sel[k].value = 1
     n_selected += 1
    else
     cmp.sel[k].value = 0
    end
-  end   
+  end
  end
 end
 
@@ -497,16 +508,16 @@ function mouse_update()
   mouse.box_y2 = stat(33)
  end
  if(stat(34) != 1 and mouse.pressed == 1) then
-  sys_update_selected() 
+  sys_update_selected()
   mouse.box_x1 = nil
   mouse.box_y1 = nil
   mouse.box_x2 = nil
   mouse.box_y2 = nil
   mouse.pressed = 0
  end
- 
+
  if(stat(34) == 2) then --right click
-  mouse.pressed = 2 
+  mouse.pressed = 2
   sys_update_destination(stat(32), stat(33))
  end
 end
@@ -533,11 +544,12 @@ end
 function _update()
  mouse_update()
  sys_animate()
+ sys_move()
 end
 
 function _draw()
  cls()
- --draw entities 
+ --draw entities
  sys_draw_entities()
  sys_draw_healthbars()
  sys_draw_hud()
