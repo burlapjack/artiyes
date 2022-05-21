@@ -342,7 +342,7 @@ function sys_draw_entities()
  for i = 1, #pos do
   for j = 1, #sprite do
    if pos[i].id == sprite[j].id then
-    spr(sprite[j].num, pos[i].x, pos[i].y, sprite[j].w, sprite[j].h, false, sprite[j].flip)
+    spr(sprite[j].num, pos[i].x, pos[i].y, sprite[j].w, sprite[j].h, sprite[j].flip, false)
    end
   end
  end
@@ -388,7 +388,7 @@ function sys_intern_y_sort()
 end
 
 function sys_move()
- local i, j
+ local i, j, l
  local graph = {}
  local px, py
  local dx, dy, ds
@@ -401,13 +401,18 @@ function sys_move()
   j = cmp_pos_get_index(dest[i].id)
   px = pos[j].x
   py = pos[j].y
-   if(px < dx) then
-    cmp.pos[j].x += min(ds, dx - px)
+  if(px < dx) then
+   cmp.pos[j].x += min(ds, dx - px)
+   l = cmp_sprite_get_index(cmp.pos[j].id)
+   cmp.sprite[l].flip = false
    elseif(px > dx) then
-    cmp.pos[j].x -= min(ds, px - dx)
-   end
-   if(py < dy) then
-    cmp.pos[j].y += min(ds, dy - py)
+   cmp.pos[j].x -= min(ds, px - dx)
+    l = cmp_sprite_get_index(cmp.pos[j].id)
+    cmp.sprite[l].flip = true
+  end
+  --simple movement
+  if(py < dy) then
+   cmp.pos[j].y += min(ds, dy - py)
    elseif(py > dy) then
     cmp.pos[j].y -= min(ds, py - dy)
    end
