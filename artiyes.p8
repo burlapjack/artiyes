@@ -2,7 +2,6 @@ pico-8 cartridge // http://www.pico-8.com
 version 33
 __lua__
 --components
-
 function cmp_init()
  local c = {
   anim   = {},
@@ -34,8 +33,8 @@ function cmp_add_health(id, val)
  add(cmp.health, {id = id, maximum = val, value = val})
 end
 
-function cmp_add_hitbox(id, x, y, w, h)
- add(cmp.hitbox, {id = id, x = x, y = y, w = w, h = h}) end
+function cmp_add_hitbox(id, w, h)
+ add(cmp.hitbox, {id = id, w = w, h = h}) end
 
 function cmp_add_hud(id, sx, sy)
  add(cmp.hud, {id = id, sx = sx, sy = sy})
@@ -159,7 +158,7 @@ function ent_add_grunt(id, x, y)
  cmp_add_destination(id, x, y, 1)
  cmp_add_name(id, "grunt")
  cmp_add_health(id, 10)
- cmp_add_hitbox(id, x, y, 8, 8)
+ cmp_add_hitbox(id, 8, 8)
  cmp_add_hud(id, 8, 0)
  cmp_add_position(id, x, y)
  cmp_add_select(id, 1)
@@ -170,7 +169,7 @@ function ent_add_house(id, x, y)
  cmp_add_animation(id, 10, {1, 2})
  cmp_add_name(id, "house")
  cmp_add_health(id, 10)
- cmp_add_hitbox(id, x, y, 8, 8)
+ cmp_add_hitbox(id, 8, 8)
  cmp_add_hud(id, 8, 0)
  cmp_add_position(id, x, y)
  cmp_add_select(id, 1)
@@ -389,7 +388,6 @@ end
 
 function sys_move()
  local i, j, l
- local graph = {}
  local px, py
  local dx, dy, ds
  local dest = cmp.dest
@@ -401,6 +399,7 @@ function sys_move()
   j = cmp_pos_get_index(dest[i].id)
   px = pos[j].x
   py = pos[j].y
+  --flip the sprite if necessary
   if(px < dx) then
    cmp.pos[j].x += min(ds, dx - px)
    l = cmp_sprite_get_index(cmp.pos[j].id)
@@ -410,16 +409,46 @@ function sys_move()
     l = cmp_sprite_get_index(cmp.pos[j].id)
     cmp.sprite[l].flip = true
   end
-  --simple movement
-  if(py < dy) then
-   cmp.pos[j].y += min(ds, dy - py)
-   elseif(py > dy) then
-    cmp.pos[j].y -= min(ds, py - dy)
+ end --for i = 1, #dest do
+end
+
+
+function sys_find_path(pos_x, pos_y, dest_x, dest_y)
+ local ls_open={}
+ local ls_closed={}
+ local n
+
+ add(ls_open, {x = pos_x, y = pos_y, f = 0, g = 0})
+
+ for n = 1, #pos do
+ end --for node = 0, #pos do
+end
+
+function sys_intern_is_colliding(id)
+ local ent
+ local ax1, ay1, ax2, ay2
+ local bx1, by1, bx2, by2
+ local i
+ local hb = cmp.hitbox
+ local pos = cmp.pos
+ local collision
+
+ ax1 = pos[cmp_pos_get_index(id)].x
+ ay1 = pos[cmp_pos_get_index(id)].y
+ ax2 = x1 + hb[cmp_hitbox_get_index(id)].w
+ ay2 = y1 + hb[cmp_hitbox_get_index(id)].h
+
+ for i = 1, #pos do
+  if(pos[i].id != id) then
+   bx1 = pos[i].x
+   by1 = pos[i].y
+   bx2 = x1 + hb[cmp_hitbox_get_index(pos[i].id)].w
+   by2 = y1 + hb[cmp_hitbox_get_index(pos[i].id)].h
+   if(ax1 < bx2 and ax2 > bx1 and ay1 < ay2 and ay2 > by1) then
+    collision = 1
    end
-   --ent moves to destination
-   --pathfinding code will be
-   --called here.
- end
+  end
+ end --for 1 = 1, #pos do
 end
 
 function sys_update_destination(x, y)
@@ -567,7 +596,6 @@ function _draw()
  if(stat(34) == 1) then
   mouse_draw_selection_box()
  end
-
 end
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
