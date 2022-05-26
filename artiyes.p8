@@ -412,7 +412,6 @@ function sys_move()
  end --for i = 1, #dest do
 end
 
-
 function sys_find_path(pos_x, pos_y, dest_x, dest_y)
  local ls_open={}
  local ls_closed={}
@@ -424,19 +423,19 @@ function sys_find_path(pos_x, pos_y, dest_x, dest_y)
  end --for node = 0, #pos do
 end
 
-function sys_intern_is_colliding(id)
- local ent
- local ax1, ay1, ax2, ay2
+function sys_intern_will_collide(id, x, y)
+ --local ax1, ay1, ax2, ay2
  local bx1, by1, bx2, by2
  local i
  local hb = cmp.hitbox
  local pos = cmp.pos
  local collision = 0
-
- ax1 = pos[cmp_pos_get_index(id)].x
- ay1 = pos[cmp_pos_get_index(id)].y
- ax2 = x1 + hb[cmp_hitbox_get_index(id)].w
- ay2 = y1 + hb[cmp_hitbox_get_index(id)].h
+ --ax1 = pos[cmp_pos_get_index(id)].x
+ --ay1 = pos[cmp_pos_get_index(id)].y
+ ax1 = x
+ ay1 = y
+ ax2 = ax1 + hb[cmp_hitbox_get_index(id)].w
+ ay2 = ay1 + hb[cmp_hitbox_get_index(id)].h
 
  for i = 1, #pos do
   if(pos[i].id != id) then
