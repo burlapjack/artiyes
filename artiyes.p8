@@ -451,6 +451,11 @@ function sys_find_path(pos_x, pos_y, dest_x, dest_y)
  end --for node = 0, #dest do
 end
 
+function sys_intern_manhatten(x1, y1, x2, y2)
+ return abs(x1 - x2) + abs(y1 - y2)
+end
+
+
 function sys_intern_will_collide(id, x, y)
  --local ax1, ay1, ax2, ay2
  local bx1, by1, bx2, by2
