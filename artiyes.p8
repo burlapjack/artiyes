@@ -431,7 +431,7 @@ function sys_intern_is_colliding(id)
  local i
  local hb = cmp.hitbox
  local pos = cmp.pos
- local collision
+ local collision = 0
 
  ax1 = pos[cmp_pos_get_index(id)].x
  ay1 = pos[cmp_pos_get_index(id)].y
@@ -446,9 +446,11 @@ function sys_intern_is_colliding(id)
    by2 = y1 + hb[cmp_hitbox_get_index(pos[i].id)].h
    if(ax1 < bx2 and ax2 > bx1 and ay1 < ay2 and ay2 > by1) then
     collision = 1
+    break
    end
   end
  end --for 1 = 1, #pos do
+ return collision
 end
 
 function sys_update_destination(x, y)
