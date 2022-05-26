@@ -413,14 +413,42 @@ function sys_move()
 end
 
 function sys_find_path(pos_x, pos_y, dest_x, dest_y)
- local ls_open={}
- local ls_closed={}
+ local ls_open   = {}
+ local ls_closed = {}
  local n
+ local dest = cmp.dest
+ local dx, dy
+ local left, right, up, down
+ local pos  = cmp.pos
+ local spd
+ local i_pos
 
- add(ls_open, {x = pos_x, y = pos_y, f = 0, g = 0})
+ add(ls_open, {x = pos_x, y = pos_y, f = 0, g = 0}) --add the initial point
 
- for n = 1, #pos do
- end --for node = 0, #pos do
+ for n = 1, #dest do
+  dx = dest[n].x
+  dy = dest[n].y
+  spd = dest[n].speed
+  i_pos = cmp_pos_get_index(dest[n].id)
+  left  = {pos[i_pos].x - spd, pos[i_pos].y}
+  right = {pos[i_pos].x + spd, pos[i_pos].y}
+  up    = {pos[i_pos].x, pos[i_pos].y - spd}
+  down  = {pos[i_pos].x, pos[i_pos].y + spd}
+
+  if(sys_intern_will_collide(dest[n].id, left[1], left[2]) == 0) then
+   add(ls_open, {x = left[1], y = left[2], f = 0, g = 0})
+  end
+  if(sys_intern_will_collide(dest[n].id, right[1], right[2]) == 0) then
+   add(ls_open, {x = right[1], y = right[2], f = 0, g = 0})
+  end
+  if(sys_intern_will_collide(dest[n].id, up[1], up[2]) == 0) then
+   add(ls_open, {x = up[1], y = up[2], f = 0, g = 0})
+  end
+  if(sys_intern_will_collide(dest[n].id, down[1], down[2]) == 0) then
+   add(ls_open, {x = down[1], y = down[2], f = 0, g = 0})
+  end
+
+ end --for node = 0, #dest do
 end
 
 function sys_intern_will_collide(id, x, y)
