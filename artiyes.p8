@@ -415,43 +415,48 @@ end
 function sys_find_path(pos_x, pos_y, dest_x, dest_y)
  local ls_open   = {}
  local ls_closed = {}
- local n
+ local next_node_id = 0
+ local n, p
  local dest = cmp.dest
  local dx, dy
  local pos  = cmp.pos
  local i_pos
+ local path_x, path_y
+ local current_g
 
  add(ls_open, {x = pos_x, y = pos_y, f = 0, g = 0}) --add the initial point
 
- for n = 1, #dest do
-
-  dx = dest[n].x
+ for n = 1, #dest do --every entity with a destination
+  dx = dest[n].x     --will get a path.
   dy = dest[n].y
   i_pos = cmp_pos_get_index(dest[n].id)
+  path_x = pos[i_pos].x 
+  path_y = pos[i_pos].y 
+  
+  --add initial node
+  add(ls_open, {id = next_node_id, x = path_x, path_y, parent = 0, f = 0, g = 0, h = 0})
 
-  sys_intern_add_neighbors(dest[n].id, pos[i_pos].x, pos[i_pos].y, ls_open)
+  while path_x != dx and path_y != dy do --begin pathfinding
+
+   --left
+   if(sys_intern_will_collide(id, path_x - 1, path_y) == 0) then
+    add(ls_open, {id = next_node_id, x = path_x - 1, path_y = y, parent = 0, f = 0, g = current_g + 1, h = sys_intern_manhatten(path_x - 1, path_y, dx, dy)})
+   end
+   --right
+   if(sys_intern_will_collide(id, path_x + 1, path_y) == 0) then
+    add(ls_open, {id = next_node_id, x = x + 1, y = path_y, parent = 0, f = 0, g = current_g + 1, h = sys_intern_manhatten(path_x + 1, path_y, dx, dy)})
+   end
+   --up
+   if(sys_intern_will_collide(id, path_x, path_y - 1) == 0) then
+    add(ls_open, {id = next_node_id, x = path_x, y = path_y - 1, parent = 0, f = 0, g = current_g + 1, h = sys_intern_manhatten(path_x, path_y - 1, dx, dy)})
+   end
+   --down
+   if(sys_intern_will_collide(id, path_x, path_y + 1) == 0) then
+    add(ls_open, {id = next_node_id, x = path_x, y = path_y + 1, parent = 0, f = 0, g = current_g + 1, h = sys_intern_manhatten(path_x, path_y + 1, dx, dy)})
+   end
+  end
  end --for node = 1, #dest do
 end
-
-function sys_intern_add_neighbors(id, x, y, ls)
-  --left
-  if(sys_intern_will_collide(id, x - 1, y) == 0) then
-   add(ls, {x = x - 1, y = y, parent = 0, f = 0, g = 0, h = 0})
-  end
-  --right
-  if(sys_intern_will_collide(id, x + 1, y) == 0) then
-   add(ls, {x = x + 1, y = y, parent = 0, f = 0, g = 0, h = 0})
-  end
-  --up
-  if(sys_intern_will_collide(id, x, y - 1) == 0) then
-   add(ls, {x = x, y = y - 1, parent = 0, f = 0, g = 0, h = 0})
-  end
-  --down
-  if(sys_intern_will_collide(id, x, y + 1) == 0) then
-   add(ls, {x = x, y = y + 1, parent = 0, f = 0, g = 0, h = 0})
-  end
-end
-
 
 function sys_intern_manhatten(x1, y1, x2, y2)
  return abs(x1 - x2) + abs(y1 - y2)
