@@ -386,6 +386,27 @@ function sys_intern_y_sort()
  end
 end
 
+function sys_intern_dest_improve()
+ --if the destination is a blocked area
+ --this function will pick a close, open spot.
+ 
+ local i
+ local dest = cmp.dest
+ local pos = cmp.pos
+ for i = 1, #dest do
+  if (sys_intern_will_collide(dest[i].id, dest[i].x, dest[i].y) == 1) then
+   --this is tricky,  if there is a collision
+   --we have to find out what is at the target location
+   --then we have to pick a spot that is between 
+   --the dest and the ent, THEN make sure that nothing
+   --is there as well. This could be a nightmare. 
+  end
+ end
+
+end
+
+
+
 function sys_move()
  local i, j, l
  local px, py
@@ -463,7 +484,7 @@ function sys_intern_manhatten(x1, y1, x2, y2)
 end
 
 function sys_intern_will_collide(id, x, y)
- --local ax1, ay1, ax2, ay2
+ local ax1, ay1, ax2, ay2
  local bx1, by1, bx2, by2
  local i
  local hb = cmp.hitbox
